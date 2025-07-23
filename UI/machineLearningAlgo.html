@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health Risk Prediction</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <style>
+        body {
+            background: #e8f5e9;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .card-panel {
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            border: 2px solid #81c784;
+        }
+
+        h2 {
+            color: #2e7d32;
+            font-weight: bold;
+        }
+
+        .field-label {
+            color: #2e7d32;
+            font-weight: 500;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .input-container {
+            margin-bottom: 20px;
+        }
+
+        input,
+        select {
+            border: 2px solid #81c784 !important;
+            border-radius: 12px !important;
+            padding: 8px 12px !important;
+            text-align: center !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+            height: auto !important;
+            background-color: white !important;
+        }
+
+        input:focus,
+        select:focus {
+            border: 2px solid #43a047 !important;
+            outline: none !important;
+            box-shadow: 0 0 5px rgba(67, 160, 71, 0.3) !important;
+        }
+
+        .btn {
+            background: #2e7d32 !important;
+            border-radius: 12px;
+            width: 100%;
+            font-size: 16px;
+            margin-top: 15px;
+            padding: 12px;
+            border: none;
+        }
+
+        .btn:hover {
+            background: #1b5e20 !important;
+            box-shadow: 0 2px 8px rgba(27, 94, 32, 0.3);
+        }
+
+        .error-text {
+            color: red;
+            font-weight: bold;
+        }
+
+        .predict-btn {
+            background: linear-gradient(145deg, #2e7d32, #43a047) !important;
+            border-radius: 12px !important;
+            width: 200px !important;
+            font-size: 16px !important;
+            margin: 25px auto 10px !important;
+            padding: 12px 24px !important;
+            border: none !important;
+            display: block !important;
+            color: white !important;
+            font-weight: 500 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 1px !important;
+            transition: all 0.3s ease !important;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+        }
+
+        .predict-btn:hover {
+            background: linear-gradient(145deg, #43a047, #2e7d32) !important;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15) !important;
+            transform: translateY(-2px) !important;
+        }
+
+        .predict-btn:active {
+            transform: translateY(1px) !important;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+        }
+
+        #result {
+            display: none;
+            /* Added this line */
+            font-size: 18px;
+            margin: 20px auto;
+            padding: 15px 30px;
+            border-radius: 12px;
+            background: #c8e6c9;
+            border: 2px solid #81c784;
+            max-width: fit-content;
+        }
+
+        select {
+            display: block !important;
+        }
+    </style>
+    <script>
+        async function predictRisk() {
+            const heartRate = parseFloat(document.getElementById("heart_rate").value);
+            const respiratoryRate = parseFloat(document.getElementById("respiratory_rate").value);
+            const bodyTemperature = parseFloat(document.getElementById("body_temperature").value);
+            const oxygenSaturation = parseFloat(document.getElementById("oxygen_saturation").value);
+            const age = parseFloat(document.getElementById("age").value);
+            const gender = parseInt(document.getElementById("gender").value); // 0: Female, 1: Male
+            const derivedHRV = parseFloat(document.getElementById("derived_hrv").value);
+            const derivedPulsePressure = parseFloat(document.getElementById("derived_pulse_pressure").value);
+            const derivedBMI = parseFloat(document.getElementById("derived_bmi").value);
+            const derivedMAP = parseFloat(document.getElementById("derived_map").value);
+
+            const inputData = {
+                features: [heartRate, respiratoryRate, bodyTemperature, oxygenSaturation, age, gender, derivedHRV, derivedPulsePressure, derivedBMI, derivedMAP]
+            };
+
+            try {
+                const response = await fetch("http://127.0.0.1:5000/predict", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(inputData),
+                });
+
+                const result = await response.json();
+
+                if (result.error) {
+                    document.getElementById("result").innerHTML = `<span style="color: red;">Error: ${result.error}</span>`;
+                } else {
+                    // In the try block where results are handled:
+                    const resultElement = document.getElementById("result");
+                    resultElement.style.display = "block";  // Added this line
+                    resultElement.innerHTML = `<strong>Predicted Risk Category:</strong> ${result.risk_category}`;
+                }
+            } catch (error) {
+                document.getElementById("result").innerHTML = `<span style="color: red;">Request failed: ${error}</span>`;
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <div class="container">
+        <h2 class="center-align">Health Risk Prediction</h2>
+
+        <form class="card-panel" onsubmit="event.preventDefault(); predictRisk();">
+            <div class="row">
+                <div class="col s12 m6">
+                    <div class="input-container">
+                        <span class="field-label">Heart Rate (bpm)</span>
+                        <input type="number" id="heart_rate" step="0.1" required>
+                    </div>
+
+                    <div class="input-container">
+                        <span class="field-label">Respiratory Rate (breaths/min)</span>
+                        <input type="number" id="respiratory_rate" step="0.1" required>
+                    </div>
+
+                    <div class="input-container">
+                        <span class="field-label">Body Temperature (°C)</span>
+                        <input type="number" id="body_temperature" step="0.1" required>
+                    </div>
+
+                    <div class="input-container">
+                        <span class="field-label">Oxygen Saturation (%)</span>
+                        <input type="number" id="oxygen_saturation" step="0.1" required>
+                    </div>
+
+                    <div class="input-container">
+                        <span class="field-label">Age (years)</span>
+                        <input type="number" id="age" required>
+                    </div>
+                </div>
+
+                <div class="col s12 m6">
+                    <div class="input-container">
+                        <span class="field-label">Gender</span>
+                        <select id="gender" required>
+                            <option value="0">Female</option>
+                            <option value="1">Male</option>
+                        </select>
+                    </div>
+
+                    <div class="input-container">
+                        <span class="field-label">Heart Rate Variability (HRV)</span>
+                        <input type="number" id="derived_hrv" step="0.1" required>
+                    </div>
+
+                    <div class="input-container">
+                        <span class="field-label">Pulse Pressure (mmHg)</span>
+                        <input type="number" id="derived_pulse_pressure" step="0.1" required>
+                    </div>
+
+                    <div class="input-container">
+                        <span class="field-label">Body Mass Index (BMI)</span>
+                        <input type="number" id="derived_bmi" step="0.1" required>
+                    </div>
+
+                    <div class="input-container">
+                        <span class="field-label">Mean Arterial Pressure (MAP)</span>
+                        <input type="number" id="derived_map" step="0.1" required>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="predict-btn waves-effect waves-light">Predict</button>
+        </form>
+
+        <h3 id="result" class="center-align"></h3>
+    </div>
+</body>
+
+</html>

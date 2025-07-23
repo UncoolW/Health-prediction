@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Patient Login</title>
+    <link rel="stylesheet" href="css/form.css" />
+    <link rel="stylesheet" href="css/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  </head>
+  <body>
+    <header class="header">
+      <a href="#" class="logo"><i class="fas fa-heartbeat"></i>MedXTech</a>
+      <nav class="navbar">
+        <a href="index.html">Home</a>
+        <a href="#Feedbacks">Feedbacks</a>
+        <a href="#Social works">Social works</a>
+        <a href="#Partners">Partners</a>
+      </nav>
+      <div id="menu-btn" class="fas fa-bars"></div>
+    </header>
+
+    <div class="form">
+      <h2>Patient Login</h2>
+      <form id="loginForm" autocomplete="off">
+        <div class="error-text" style="display: none; color: red"></div>
+
+        <div class="input">
+          <label>Email</label>
+          <input
+            type="email"
+            name="email"
+            placeholder="Enter Your Email"
+            required
+          />
+        </div>
+
+        <div class="input">
+          <label>Password</label>
+          <input type="password" name="pass" placeholder="Password" required />
+        </div>
+
+        <div class="submit">
+          <input type="submit" value="Login Now" class="button" />
+        </div>
+      </form>
+      <div class="link">
+        Not Signed up? <a href="registration_Patient.html">Signup Now</a>
+      </div>
+    </div>
+
+    <script>
+      $("#loginForm").submit(function (e) {
+        e.preventDefault();
+
+        const email = $("input[name='email']").val();
+        const password = $("input[name='pass']").val();
+
+        $.ajax({
+          url: "http://127.0.0.1:5000/auth/login", // 🔁 Your Flask API endpoint
+          method: "POST",
+          contentType: "application/json",
+          xhrFields: { withCredentials: true },
+          data: JSON.stringify({ email: email, password: password }),
+          success: function (response) {
+            // ✅ Redirect to guest.html after successful login
+            window.location.href = "frist.html";
+          },
+          error: function (xhr) {
+            const res = xhr.responseJSON;
+            const msg =
+              res?.message || res?.error || "An unexpected error occurred";
+            alert(msg);
+          },
+        });
+      });
+    </script>
+  </body>
+</html>
